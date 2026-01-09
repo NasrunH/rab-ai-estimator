@@ -32,8 +32,6 @@ class RABItem(BaseModel):
     uraian_pekerjaan: str = Field(description="Uraian detail pekerjaan")
     volume: float = Field(description="Volume pekerjaan")
     satuan: str = Field(description="Satuan pengukuran (m2, m3, bh, ls, dll)")
-    harga_satuan: float = Field(description="Harga satuan standar per unit")
-    total_harga: float = Field(description="Total harga (volume * harga_satuan)")
     kategori: str = Field(description="Kategori pekerjaan (Persiapan, Struktur, Arsitektur, MEP, dll)")
 
 def attempt_generate(model_name, contents, config):

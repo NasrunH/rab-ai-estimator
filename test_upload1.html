@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI RAB Estimator Pro</title>
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #27ae60;
+        --primary-hover: #27ae60;
+        --secondary: #64748b;
+        --success: #059669;
+        --danger: #dc2626;
+        --background: #f8fafc;
+        --card: #ffffff;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --border: #e2e8f0;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: var(--background);
+        color: var(--text-main);
+        line-height: 1.6;
+        padding: 2rem 1rem;
+      }
+
+      .container {
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+      }
+
+      header h1 {
+        font-size: 2.25rem;
+        font-weight: 800;
+        color: #0f172a;
+        letter-spacing: -0.025em;
+        margin-bottom: 0.5rem;
+      }
+
+      header p {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+      }
+
+      /* Input Section */
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+      }
+
+      .grid-input {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      @media (min-width: 768px) {
+        .grid-input {
+          grid-template-columns: 1.5fr 1fr;
+        }
+      }
+
+      label {
+        display: block;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        color: #334155;
+      }
+
+      textarea {
+        width: 100%;
+        height: 120px;
+        padding: 1rem;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        font-family: inherit;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+        resize: none;
+      }
+
+      textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      }
+
+      /* Upload Area */
+      .upload-zone {
+        border: 2px dashed var(--border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+        background: #fcfdfe;
+      }
+
+      .upload-zone:hover {
+        border-color: var(--primary);
+        background: #f0f7ff;
+      }
+
+      .upload-zone input {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+      }
+
+      .upload-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        display: block;
+      }
+
+      /* Preview Area */
+      #previewContainer {
+        margin-top: 1rem;
+        display: none;
+        position: relative;
+      }
+
+      .preview-content {
+        padding: 0.75rem;
+        background: #f1f5f9;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+      }
+
+      .btn-generate {
+        width: 100%;
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 1rem;
+        font-size: 1rem;
+        font-weight: 700;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .btn-generate:hover {
+        background: var(--primary-hover);
+        transform: translateY(-1px);
+      }
+
+      .btn-generate:disabled {
+        background: var(--secondary);
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      /* Loading State */
+      .loading-container {
+        display: none;
+        text-align: center;
+        padding: 2rem;
+      }
+
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid var(--primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Results UI */
+      #resultsArea {
+        display: none;
+      }
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+      }
+
+      .stat-label {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+      }
+
+      .stat-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--primary);
+      }
+
+      /* Table Design */
+      .table-responsive {
+        overflow-x: auto;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: white;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: 0.9rem;
+      }
+
+      th {
+        background: #f8fafc;
+        padding: 1rem;
+        font-weight: 700;
+        color: #475569;
+        border-bottom: 2px solid var(--border);
+      }
+
+      td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      tr:last-child td {
+        border-bottom: none;
+      }
+
+      .cat-badge {
+        display: inline-block;
+        padding: 0.25rem 0.6rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        background: #eff6ff;
+        color: var(--primary);
+      }
+
+      .row-total {
+        background: #f8fafc;
+        font-weight: 800;
+        font-size: 1rem;
+      }
+
+      .error-box {
+        background: #fef2f2;
+        color: var(--danger);
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid #fee2e2;
+        margin-bottom: 1rem;
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>AI Estimator <span style="color: var(--primary)">RAB</span></h1>
+        <p>
+          Gunakan kecerdasan buatan untuk menghitung estimasi biaya konstruksi
+          Anda secara instan.
+        </p>
+      </header>
+
+      <div class="card">
+        <div class="grid-input">
+          <div class="input-field">
+            <label for="promptInput">Deskripsi Proyek</label>
+            <textarea
+              id="promptInput"
+              placeholder="Contoh: Bangun rumah 1 lantai tipe 45, dinding bata merah, atap baja ringan..."
+            ></textarea>
+          </div>
+          <div class="input-field">
+            <label>File Pendukung (Gambar/PDF)</label>
+            <div class="upload-zone">
+              <span class="upload-icon">📁</span>
+              <strong>Klik untuk upload</strong>
+              <p style="font-size: 0.8rem; color: var(--text-muted)">
+                PNG, JPG, atau PDF Denah/Teknis
+              </p>
+              <input
+                type="file"
+                id="fileInput"
+                accept="image/*,application/pdf"
+              />
+            </div>
+            <div id="previewContainer">
+              <div class="preview-content">
+                <span id="fileIcon">📄</span>
+                <span id="fileName">Nama_file.pdf</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button id="generateBtn" class="btn-generate" onclick="generateRAB()">
+          <span id="btnText">Mulai Estimasi AI</span>
+        </button>
+      </div>
+
+      <div id="errorBox" class="error-box"></div>
+
+      <div id="loading" class="loading-container">
+        <div class="spinner"></div>
+        <h3 id="loadingStatus">Menganalisis Dokumen...</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem">
+          AI sedang menghitung volume dan harga satuan berdasarkan standar
+          konstruksi.
+        </p>
+      </div>
+
+      <!-- Results Section -->
+      <div id="resultsArea">
+        <div class="summary-grid">
+          <div class="stat-card">
+            <div class="stat-label">Total Estimasi</div>
+            <div class="stat-value" id="totalEstimate">Rp 0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Jumlah Item</div>
+            <div
+              class="stat-value"
+              id="totalItems"
+              style="color: var(--text-main)"
+            >
+              0
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Kategori Utama</div>
+            <div
+              class="stat-value"
+              id="topCategory"
+              style="color: var(--success)"
+            >
+              -
+            </div>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Kategori</th>
+                <th>Uraian Pekerjaan</th>
+                <th>Vol</th>
+                <th>Sat</th>
+                <th style="text-align: right">Harga Satuan</th>
+                <th style="text-align: right">Total Harga</th>
+              </tr>
+            </thead>
+            <tbody id="rabTableBody"></tbody>
+            <tfoot>
+              <tr class="row-total">
+                <td colspan="5" style="text-align: right; padding: 1.25rem">
+                  GRAND TOTAL
+                </td>
+                <td
+                  id="grandTotalCell"
+                  style="
+                    text-align: right;
+                    padding: 1.25rem;
+                    color: var(--primary);
+                  "
+                >
+                  Rp 0
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div style="margin-top: 1.5rem; text-align: center">
+          <button
+            onclick="window.print()"
+            style="
+              background: none;
+              border: 1px solid var(--border);
+              padding: 0.5rem 1rem;
+              border-radius: 8px;
+              cursor: pointer;
+              font-size: 0.85rem;
+              font-weight: 600;
+            "
+          >
+            🖨️ Cetak atau Simpan PDF
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const fileInput = document.getElementById("fileInput");
+      const previewContainer = document.getElementById("previewContainer");
+      const fileNameDisplay = document.getElementById("fileName");
+      const fileIcon = document.getElementById("fileIcon");
+      const errorBox = document.getElementById("errorBox");
+      const loading = document.getElementById("loading");
+      const resultsArea = document.getElementById("resultsArea");
+      const generateBtn = document.getElementById("generateBtn");
+      const btnText = document.getElementById("btnText");
+
+      let base64Data = "";
+      let fileType = "";
+
+      fileInput.addEventListener("change", function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        fileType = file.type;
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+          base64Data = e.target.result;
+          previewContainer.style.display = "block";
+          fileNameDisplay.textContent = file.name;
+          fileIcon.textContent = fileType.includes("pdf") ? "📄" : "🖼️";
+        };
+        reader.readAsDataURL(file);
+      });
+
+      async function generateRAB() {
+        const promptVal = document.getElementById("promptInput").value.trim();
+
+        if (!base64Data && !promptVal) {
+          showError(
+            "Harap masukkan instruksi atau upload file terlebih dahulu."
+          );
+          return;
+        }
+
+        // Reset UI
+        errorBox.style.display = "none";
+        resultsArea.style.display = "none";
+        loading.style.display = "block";
+        generateBtn.disabled = true;
+        btnText.textContent = "Memproses...";
+
+        try {
+          const payload = {
+            prompt: promptVal,
+            file: base64Data,
+            file_type: fileType,
+          };
+
+          const response = await fetch("http://localhost:5000/generate-rab", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok)
+            throw new Error(data.error || "Terjadi kesalahan pada server AI.");
+
+          renderResults(data);
+        } catch (error) {
+          showError(error.message);
+        } finally {
+          loading.style.display = "none";
+          generateBtn.disabled = false;
+          btnText.textContent = "Mulai Estimasi AI";
+        }
+      }
+
+      function renderResults(data) {
+        const tbody = document.getElementById("rabTableBody");
+        tbody.innerHTML = "";
+        let grandTotal = 0;
+        let categories = {};
+
+        if (!Array.isArray(data)) {
+          showError("Format data yang diterima tidak valid.");
+          return;
+        }
+
+        data.forEach((item) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+                <td><span class="cat-badge">${item.kategori}</span></td>
+                <td><div style="font-weight: 500;">${
+                  item.uraian_pekerjaan
+                }</div></td>
+                <td>${item.volume}</td>
+                <td style="color: var(--text-muted);">${item.satuan}</td>
+                <td style="text-align: right;">${formatCurrency(
+                  item.harga_satuan
+                )}</td>
+                <td style="text-align: right; font-weight: 600;">${formatCurrency(
+                  item.total_harga
+                )}</td>
+            `;
+          tbody.appendChild(row);
+
+          grandTotal += item.total_harga;
+          categories[item.kategori] =
+            (categories[item.kategori] || 0) + item.total_harga;
+        });
+
+        // Update Statistics
+        document.getElementById("totalEstimate").textContent =
+          formatCurrency(grandTotal);
+        document.getElementById("grandTotalCell").textContent =
+          formatCurrency(grandTotal);
+        document.getElementById("totalItems").textContent = data.length;
+
+        // Find top category
+        const topCat = Object.entries(categories).reduce((a, b) =>
+          a[1] > b[1] ? a : b
+        )[0];
+        document.getElementById("topCategory").textContent = topCat;
+
+        resultsArea.style.display = "block";
+
+        // Smooth scroll to results
+        resultsArea.scrollIntoView({ behavior: "smooth" });
+      }
+
+      function formatCurrency(val) {
+        return new Intl.NumberFormat("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          minimumFractionDigits: 0,
+        }).format(val);
+      }
+
+      function showError(msg) {
+        errorBox.textContent = "⚠️ " + msg;
+        errorBox.style.display = "block";
+        window.scrollTo({ top: errorBox.offsetTop - 100, behavior: "smooth" });
+      }
+    </script>
+  </body>
+</html>
