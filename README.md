@@ -1,148 +1,109 @@
 🏗️ AI RAB Generator (Python Backend)
 
-Proyek ini adalah microservice berbasis Python yang menggunakan Google Gemini AI untuk menganalisis gambar denah bangunan dan menghasilkan estimasi RAB (Rencana Anggaran Biaya) kasar dalam format JSON.
-
-Sistem ini dirancang untuk diintegrasikan dengan aplikasi utama (misalnya CodeIgniter 4 atau Laravel).
+Proyek ini adalah microservice berbasis Python yang menggunakan Google Gemini AI untuk menganalisis gambar denah bangunan atau dokumen PDF teknik, lalu menghasilkan estimasi RAB (Rencana Anggaran Biaya) secara otomatis dalam format JSON terstruktur.
 
 📋 Prasyarat (Requirements)
 
 Sebelum memulai, pastikan komputer Anda memiliki:
 
-Python 3.10 atau lebih baru (Disarankan Python 3.12).
+Python 3.10+: Disarankan Python 3.12. (Centang "Add Python to PATH" saat instalasi).
 
-Download: python.org
+Poppler: Dibutuhkan oleh library pdf2image untuk memproses file PDF.
 
-⚠️ PENTING: Saat instalasi, pastikan mencentang opsi "Add Python to PATH".
+Windows: Download dari poppler-windows, ekstrak, dan tambahkan folder bin ke Environment Variables PATH.
 
-API Key Google Gemini (Gratis via Google AI Studio).
+Linux: sudo apt-get install poppler-utils.
+
+Mac: brew install poppler.
+
+API Key Google Gemini: Dapatkan gratis di Google AI Studio.
 
 🚀 Instalasi & Setup
 
-Ikuti langkah-langkah ini secara berurutan di terminal (PowerShell atau CMD).
+Buat Virtual Environment
 
-1. Buat Virtual Environment
-
-Agar library tidak bentrok dengan sistem Windows, kita wajib menggunakan Virtual Environment.
-
-# Masuk ke folder proyek
-cd C:\path\ke\folder\estimator
-
-# Buat environment baru bernama 'venv'
+cd C:\path\ke\folder\proyek
 python -m venv venv
 
 
-2. Aktifkan Environment
+Aktifkan Environment
 
-Setiap kali ingin menjalankan aplikasi, langkah ini wajib dilakukan.
+Windows (PowerShell): .\venv\Scripts\Activate.ps1
 
-Untuk Windows (PowerShell):
+Windows (CMD): venv\Scripts\activate.bat
 
-.\venv\Scripts\Activate.ps1
+Install Library
 
-
-Untuk Windows (CMD):
-
-venv\Scripts\activate.bat
-
-
-✅ Indikator Sukses: Akan muncul tulisan (venv) di sebelah kiri baris perintah terminal Anda.
-
-3. Install Library
-
-Install semua paket yang dibutuhkan (Flask, Google AI, Dotenv).
-
-pip install flask google-generativeai python-dotenv
+pip install flask flask-cors google-genai python-dotenv pydantic pillow pdf2image
 
 
 ⚙️ Konfigurasi
 
-1. Setup API Key
+Setup API Key
+Buat file .env di folder root:
 
-Buat file baru bernama .env (tanpa nama depan) di dalam folder root proyek. Isi file tersebut dengan baris berikut:
-
-GEMINI_API_KEY=KODE_API_KEY_ANDA_DISINI
+GEMINI_API_KEY=KODE_API_KEY_ANDA
 
 
-Jangan bagikan file .env ini ke orang lain atau upload ke GitHub publik.
-
-2. Cek Model AI (ai_server.py)
-
-Pastikan script ai_server.py menggunakan model yang Gratis & Stabil untuk menghindari error limit kuota.
-
-# Pastikan baris ini menggunakan 1.5-flash
-model = genai.GenerativeModel('gemini-1.5-flash')
-
+Model AI
+Script ini menggunakan model gemini-1.5-flash-latest untuk kecepatan dan dukungan multimodal (gambar/PDF) yang stabil.
 
 ▶️ Cara Menjalankan
 
-Pastikan terminal masih dalam mode (venv).
+Pastikan terminal dalam mode (venv), lalu jalankan:
 
-Jalankan server:
-
-python ai_server.py
+python server1.py
 
 
-Jika berhasil, akan muncul pesan:
+Server akan berjalan di http://localhost:5000.
 
-Server berjalan di [http://0.0.0.0:5000](http://0.0.0.0:5000)
+🔗 Endpoint API
+
+Sistem menyediakan endpoint utama untuk integrasi (CodeIgniter, Laravel, React, dll):
+
+URL: http://localhost:5000/generate-rab
+
+Method: POST
+
+Payload (JSON):
+
+{
+  "prompt": "Opsional: Instruksi tambahan",
+  "file": "Data base64 dari Gambar atau PDF",
+  "file_type": "application/pdf atau image/png"
+}
 
 
-(Jangan tutup terminal ini selama aplikasi digunakan)
+🛠️ Troubleshooting
 
-🧪 Cara Testing (Tanpa Frontend)
-
-Kami telah menyediakan file UI sederhana untuk memastikan AI bekerja sebelum diintegrasikan ke CodeIgniter.
-
-Pastikan ai_server.py sedang berjalan.
-
-Buka file test_upload.html (Double click atau drag ke Browser).
-
-Upload gambar denah (JPG/PNG).
-
-Klik Analisis.
-
-Tunggu 5-10 detik hingga JSON muncul.
-
-🛠️ Troubleshooting (Masalah Umum)
-
-Error
+Masalah
 
 Penyebab
 
 Solusi
 
-ModuleNotFoundError
+Unable to get page count
 
-Python tidak membaca library yang diinstall.
+Poppler belum terinstall/PATH salah.
 
-Pastikan (venv) aktif. Jalankan pakai .\venv\Scripts\python ai_server.py.
+Install Poppler dan pastikan perintah pdftoppm -v jalan di CMD.
 
-Error 404 (Model not found)
+Error 404 (Not Found)
 
-Nama model salah atau tidak tersedia.
+Nama model salah atau SDK lama.
 
-Ganti nama model di ai_server.py menjadi gemini-1.5-flash atau gemini-flash-latest.
+Gunakan gemini-1.5-flash-latest dan update library: pip install --upgrade google-genai.
 
-Error 429 (Quota Exceeded)
+Error 429 (Rate Limit)
 
-Limit penggunaan habis atau pakai model berbayar.
+Penggunaan gratis terlalu sering.
 
-Jangan pakai gemini-2.0. Gunakan gemini-1.5-flash.
+Tunggu 1-2 menit sebelum mencoba lagi.
 
-pip command not found
+Invalid Image Data
 
-Python belum masuk PATH Windows.
+Format base64 tidak lengkap.
 
-Install ulang Python dan centang "Add Python to PATH".
+Pastikan string base64 dikirim dengan benar dari frontend.
 
-🔗 Endpoint API
-
-Jika ingin dihubungkan ke CodeIgniter/Postman:
-
-URL: http://localhost:5000/analyze
-
-Method: POST
-
-Body (Form-Data):
-
-Key: image (Type: File)
+Catatan: Gunakan model Flash untuk efisiensi biaya dan kecepatan analisis dokumen.

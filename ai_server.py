@@ -8,6 +8,7 @@ import base64
 import io
 import time
 from PIL import Image
+from pdf2image import convert_from_bytes # Import tambahan untuk PDF
 
 # Load environment variables
 load_dotenv()
@@ -57,7 +58,7 @@ def attempt_generate(model_name, contents, config):
             print(f"  -> Error pada {model_name}: {error_str}")
             
             # Cek error quota (429) atau server overload (503/500)
-            if "429" in error_str or "RESOURCE_EXHAUSTED" in error_str or "500" in error_str or "503" in error_str:
+            if any(x in error_str for x in ["429", "RESOURCE_EXHAUSTED", "500", "503"]):
                 if attempt < max_retries - 1:
                     sleep_time = (attempt + 1) * base_delay
                     print(f"  -> Quota penuh atau server sibuk. Menunggu {sleep_time} detik sebelum retry...")
@@ -66,8 +67,6 @@ def attempt_generate(model_name, contents, config):
                 else:
                     print(f"  -> Gagal setelah {max_retries} kali percobaan pada model {model_name}.")
                     raise e
-            
-            # Jika error 404 (Model not found) atau 400 (Bad Request), jangan retry, langsung raise agar pindah ke model cadangan
             else:
                 raise e
 
@@ -81,11 +80,13 @@ def generate_rab():
         if not data:
             return jsonify({"error": "No data provided"}), 400
 
-        image_data = data.get('image')
+        # Mendukung field 'image' (bisa berisi PDF base64) atau 'file'
+        image_data = data.get('image') or data.get('file')
+        file_type = data.get('file_type', '') # Opsional, untuk deteksi lebih akurat
         user_prompt = data.get('prompt')
 
         if not image_data and not user_prompt:
-            return jsonify({"error": "Harap sertakan gambar ATAU deskripsi teks."}), 400
+            return jsonify({"error": "Harap sertakan gambar/PDF ATAU deskripsi teks."}), 400
 
         contents = []
 
@@ -104,10 +105,10 @@ def generate_rab():
         if user_prompt:
             final_prompt = f"{base_instruction}\n\nPermintaan Spesifik User: {user_prompt}"
             if image_data:
-                final_prompt += "\n\nAnalisis gambar yang disertakan untuk melengkapi detail RAB sesuai permintaan user."
+                final_prompt += "\n\nAnalisis file (gambar/PDF) yang disertakan untuk melengkapi detail RAB sesuai permintaan user."
         else:
             final_prompt = base_instruction + """
-            \n\nAnalisis gambar arsitektur/teknik yang diberikan dengan sangat teliti:
+            \n\nAnalisis file arsitektur/teknik yang diberikan dengan sangat teliti:
             1. Identifikasi jenis bangunan dan fungsi.
             2. Perkirakan dimensi dan luas berdasarkan proporsi visual.
             3. Tentukan spesifikasi material yang standar digunakan untuk tipe bangunan tersebut.
@@ -116,22 +117,36 @@ def generate_rab():
 
         contents.append(final_prompt)
 
-        # Process image if provided
+        # Logika Pengolahan File (Gambar atau PDF)
         if image_data:
             try:
+                # Bersihkan prefix base64
                 if "base64," in image_data:
                     image_data = image_data.split("base64,")[1]
                 
-                image_bytes = base64.b64decode(image_data)
-                image = Image.open(io.BytesIO(image_bytes))
-                contents.append(image)
+                file_bytes = base64.b64decode(image_data)
+
+                # Cek apakah file adalah PDF (berdasarkan file_type atau magic bytes PDF '%PDF-')
+                if file_type == 'application/pdf' or image_data.startswith('JVBERi0'):
+                    print("File terdeteksi sebagai PDF. Mengonversi ke gambar...")
+                    # Konversi PDF ke gambar (setiap halaman menjadi satu gambar)
+                    pages = convert_from_bytes(file_bytes)
+                    for page in pages:
+                        contents.append(page)
+                    print(f"Berhasil memproses {len(pages)} halaman PDF.")
+                else:
+                    # Proses sebagai gambar biasa
+                    image = Image.open(io.BytesIO(file_bytes))
+                    contents.append(image)
+                    
             except Exception as img_err:
-                return jsonify({"error": f"Invalid image data: {str(img_err)}"}), 400
+                print(f"Error processing file: {img_err}")
+                return jsonify({"error": f"Invalid file data: {str(img_err)}"}), 400
 
         # --- LOGIC PEMILIHAN MODEL (FALLBACK CHAIN) ---
-        # Daftar model yang lebih aman dan umum tersedia
+        # Menggunakan gemini-1.5-flash-latest untuk menghindari error 404 model lama
         candidate_models = [
-            "gemini-flash-latest"         # Prioritas 3: Fallback terakhir (lebih berat quota)
+            "gemini-flash-latest"
         ]
         
         last_error = None
@@ -151,7 +166,6 @@ def generate_rab():
                 last_error = e
                 continue
 
-        # Jika semua model dalam list gagal
         error_msg = str(last_error)
         friendly_error = "Maaf, server AI sedang sangat sibuk (Rate Limit). Silakan coba lagi dalam 1-2 menit." if "429" in error_msg else f"Terjadi kesalahan teknis: {error_msg}"
         

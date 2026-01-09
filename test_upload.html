@@ -3,109 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test RAB Generator AI</title>
+    <title>AI RAB Estimator - PDF & Image</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 800px; margin: 20px auto; padding: 0 20px; color: #333; }
-        h1 { color: #2c3e50; }
-        .container { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .input-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; }
-        .preview { max-width: 100%; margin: 10px 0; max-height: 300px; object-fit: contain; border-radius: 4px; display: none; }
-        #result { white-space: pre-wrap; background: #f8f9fa; padding: 15px; border-radius: 5px; border: 1px solid #dee2e6; max-height: 500px; overflow-y: auto; }
-        .loading { display: none; color: #0056b3; font-weight: bold; margin: 10px 0; }
-        button { padding: 12px 24px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; transition: background 0.3s; }
-        button:hover { background: #0056b3; }
-        button:disabled { background: #ccc; cursor: not-allowed; }
-        .note { font-size: 0.9em; color: #666; margin-top: 5px; }
+        /* Gaya dasar tetap sama dengan tambahan sedikit estetika */
+        body { font-family: 'Segoe UI', sans-serif; max-width: 900px; margin: 20px auto; padding: 0 20px; background-color: #f4f7f6; }
+        .container { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        h1 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .input-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #444; }
+        textarea { width: 100%; height: 100px; padding: 12px; border: 1px solid #ddd; border-radius: 6px; resize: vertical; }
+        
+        /* Preview Area */
+        #previewContainer { margin: 15px 0; display: none; padding: 10px; border: 1px dashed #bbb; border-radius: 6px; text-align: center; }
+        .preview-img { max-width: 100%; max-height: 250px; border-radius: 4px; }
+        .pdf-icon-msg { color: #e74c3c; font-weight: bold; }
+
+        #result { white-space: pre-wrap; background: #272822; color: #f8f8f2; padding: 15px; border-radius: 6px; max-height: 500px; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 13px; }
+        .loading { display: none; background: #e8f4fd; border-left: 5px solid #007bff; padding: 15px; margin: 15px 0; border-radius: 4px; }
+        
+        button { padding: 12px 28px; background: #27ae60; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; transition: 0.3s; }
+        button:hover { background: #219150; }
+        button:disabled { background: #bdc3c7; cursor: not-allowed; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>RAB Generator AI</h1>
+        <h1>Estimator RAB Proyek AI</h1>
         
         <div class="input-group">
-            <label for="promptInput">Deskripsi Proyek / Instruksi (Opsional jika ada gambar):</label>
-            <textarea id="promptInput" placeholder="Contoh: Buatkan RAB untuk renovasi dapur ukuran 3x4 meter dengan kabinet HPL dan lantai granit..."></textarea>
+            <label for="promptInput">Instruksi Spesifik (Opsional):</label>
+            <textarea id="promptInput" placeholder="Contoh: Fokus pada pekerjaan dinding, gunakan material Bata Ringan..."></textarea>
         </div>
 
         <div class="input-group">
-            <label for="imageInput">Upload Gambar Denah/Konstruksi (Opsional jika ada deskripsi):</label>
-            <input type="file" id="imageInput" accept="image/*">
-            <img id="imagePreview" class="preview">
+            <label for="fileInput">Upload Dokumen (Gambar Denah atau File PDF):</label>
+            <input type="file" id="fileInput" accept="image/*,application/pdf">
+            <div id="previewContainer">
+                <img id="imagePreview" class="preview-img" style="display:none;">
+                <div id="pdfMessage" class="pdf-icon-msg" style="display:none;">📄 File PDF Terpilih</div>
+            </div>
         </div>
         
-        <button id="generateBtn" onclick="generateRAB()">Hitung Estimasi RAB</button>
-        <div class="note">* Minimal sertakan Gambar ATAU Deskripsi.</div>
+        <button id="generateBtn" onclick="generateRAB()">Generate Estimasi RAB</button>
 
         <div id="loading" class="loading">
-            Sedang menganalisis data dan menghitung RAB... <br>
-            <small>Mohon tunggu, proses ini melibatkan analisis AI yang mendalam.</small>
+            ⏳ <strong>Sedang Memproses:</strong> AI sedang membaca file dan menghitung volume... <br>
+            <small>PDF mungkin butuh waktu lebih lama karena proses konversi halaman.</small>
         </div>
         
-        <h3>Hasil Estimasi (JSON):</h3>
-        <pre id="result">Hasil akan muncul di sini...</pre>
+        <h3>Hasil JSON RAB:</h3>
+        <pre id="result">Hasil akan muncul di sini setelah proses selesai...</pre>
     </div>
 
     <script>
-        const imageInput = document.getElementById('imageInput');
+        const fileInput = document.getElementById('fileInput');
         const imagePreview = document.getElementById('imagePreview');
+        const pdfMessage = document.getElementById('pdfMessage');
+        const previewContainer = document.getElementById('previewContainer');
         const promptInput = document.getElementById('promptInput');
         const generateBtn = document.getElementById('generateBtn');
         const resultDiv = document.getElementById('result');
         const loadingDiv = document.getElementById('loading');
-        let base64Image = '';
 
-        imageInput.addEventListener('change', function(e) {
+        let base64Data = '';
+        let fileType = '';
+
+        fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    base64Image = e.target.result;
-                    imagePreview.src = base64Image;
+            if (!file) return;
+
+            fileType = file.type;
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                base64Data = e.target.result;
+                previewContainer.style.display = 'block';
+
+                if (fileType.includes('image')) {
+                    imagePreview.src = base64Data;
                     imagePreview.style.display = 'block';
+                    pdfMessage.style.display = 'none';
+                } else if (fileType === 'application/pdf') {
+                    imagePreview.style.display = 'none';
+                    pdfMessage.style.display = 'block';
+                    pdfMessage.innerText = `📄 PDF Terdeteksi: ${file.name}`;
                 }
-                reader.readAsDataURL(file);
-            } else {
-                base64Image = '';
-                imagePreview.style.display = 'none';
-            }
+            };
+            reader.readAsDataURL(file);
         });
 
         async function generateRAB() {
             const promptVal = promptInput.value.trim();
             
-            if (!base64Image && !promptVal) {
-                alert("Mohon isi deskripsi proyek ATAU upload gambar!");
+            if (!base64Data && !promptVal) {
+                alert("Mohon masukkan instruksi atau upload file (Gambar/PDF)!");
                 return;
             }
 
             loadingDiv.style.display = 'block';
             generateBtn.disabled = true;
-            resultDiv.textContent = 'Memproses...';
+            resultDiv.textContent = 'Menghubungi AI Estimator...';
 
             try {
-                const payload = {};
-                if (base64Image) payload.image = base64Image;
-                if (promptVal) payload.prompt = promptVal;
+                const payload = {
+                    prompt: promptVal,
+                    file: base64Data, // Data base64 (termasuk prefix)
+                    file_type: fileType // Info tipe file (image/png, application/pdf, dll)
+                };
 
+                // Ganti URL ini sesuai dengan lokasi server Flask Anda
                 const response = await fetch('http://localhost:5000/generate-rab', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
 
                 const data = await response.json();
                 
-                if (!response.ok) {
-                    throw new Error(data.error || 'Terjadi kesalahan pada server');
-                }
+                if (!response.ok) throw new Error(data.error || 'Server Error');
 
                 resultDiv.textContent = JSON.stringify(data, null, 2);
             } catch (error) {
-                resultDiv.textContent = 'Error: ' + error.message;
+                resultDiv.textContent = '❌ Error: ' + error.message;
             } finally {
                 loadingDiv.style.display = 'none';
                 generateBtn.disabled = false;
