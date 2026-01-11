@@ -4,21 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI RAB Estimator Pro</title>
-    <!-- Google Fonts -->
+
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
+
     <style>
       :root {
         --primary: #27ae60;
-        --primary-hover: #27ae60;
+        --primary-hover: #239a54;
         --secondary: #64748b;
-        --success: #059669;
         --danger: #dc2626;
         --background: #f8fafc;
         --card: #ffffff;
-        --text-main: #1e293b;
+        --text-main: #0f172a;
         --text-muted: #64748b;
         --border: #e2e8f0;
       }
@@ -38,82 +38,137 @@
       }
 
       .container {
-        max-width: 1000px;
+        max-width: 980px;
         margin: 0 auto;
       }
 
       header {
         text-align: center;
-        margin-bottom: 2.5rem;
+        margin-bottom: 2rem;
       }
 
       header h1 {
-        font-size: 2.25rem;
-        font-weight: 800;
-        color: #0f172a;
-        letter-spacing: -0.025em;
-        margin-bottom: 0.5rem;
+        font-size: 2.4rem;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        margin-bottom: 0.35rem;
+      }
+
+      header h1 span {
+        color: var(--primary);
       }
 
       header p {
         color: var(--text-muted);
-        font-size: 1.1rem;
+        font-size: 1.05rem;
       }
 
-      /* Input Section */
       .card {
         background: var(--card);
         border: 1px solid var(--border);
-        border-radius: 16px;
+        border-radius: 18px;
         padding: 2rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        margin-bottom: 2rem;
-      }
-
-      .grid-input {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
         margin-bottom: 1.5rem;
       }
 
-      @media (min-width: 768px) {
-        .grid-input {
-          grid-template-columns: 1.5fr 1fr;
-        }
+      /* Centered layout */
+      .center-stack {
+        max-width: 760px;
+        margin: 0 auto;
+      }
+
+      /* Mode selector */
+      .mode-wrap {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+      }
+
+      .mode-title {
+        font-weight: 800;
+        font-size: 0.95rem;
+        color: #334155;
+        margin-right: 0.25rem;
+      }
+
+      .mode-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 0.95rem;
+        border-radius: 9999px;
+        border: 1px solid var(--border);
+        background: #fff;
+        cursor: pointer;
+        user-select: none;
+        transition: all 0.15s;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #334155;
+      }
+
+      .mode-pill input {
+        accent-color: var(--primary);
+      }
+
+      .mode-pill.active {
+        border-color: rgba(39, 174, 96, 0.55);
+        box-shadow: 0 0 0 4px rgba(39, 174, 96, 0.13);
+      }
+
+      /* Field blocks */
+      .field {
+        margin-bottom: 1.25rem;
       }
 
       label {
         display: block;
-        font-weight: 600;
-        font-size: 0.9rem;
-        margin-bottom: 0.5rem;
+        font-weight: 800;
+        font-size: 0.95rem;
+        margin-bottom: 0.6rem;
         color: #334155;
+      }
+
+      .subtext {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-top: 0.45rem;
       }
 
       textarea {
         width: 100%;
-        height: 120px;
-        padding: 1rem;
+        height: 150px;
+        padding: 1rem 1rem;
         border: 1px solid var(--border);
-        border-radius: 12px;
+        border-radius: 14px;
         font-family: inherit;
         font-size: 1rem;
-        transition: border-color 0.2s;
+        transition: border-color 0.2s, box-shadow 0.2s;
         resize: none;
+        background: #fff;
       }
 
       textarea:focus {
         outline: none;
         border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        box-shadow: 0 0 0 4px rgba(39, 174, 96, 0.12);
+      }
+
+      textarea:disabled {
+        background: #f1f5f9;
+        cursor: not-allowed;
+        opacity: 0.9;
       }
 
       /* Upload Area */
       .upload-zone {
         border: 2px dashed var(--border);
-        border-radius: 12px;
-        padding: 1.5rem;
+        border-radius: 14px;
+        padding: 1.2rem;
         text-align: center;
         cursor: pointer;
         transition: all 0.2s;
@@ -123,7 +178,25 @@
 
       .upload-zone:hover {
         border-color: var(--primary);
-        background: #f0f7ff;
+        background: #f0fdf4;
+      }
+
+      .upload-zone.dragover {
+        border-color: var(--primary);
+        background: #ecfdf5;
+        transform: translateY(-1px);
+      }
+
+      .upload-zone.disabled {
+        cursor: not-allowed;
+        opacity: 0.7;
+        background: #f1f5f9;
+      }
+
+      .upload-zone.disabled:hover {
+        border-color: var(--border);
+        background: #f1f5f9;
+        transform: none;
       }
 
       .upload-zone input {
@@ -133,28 +206,73 @@
         cursor: pointer;
       }
 
+      .upload-zone.disabled input {
+        pointer-events: none;
+      }
+
       .upload-icon {
         font-size: 2rem;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.45rem;
         display: block;
       }
 
-      /* Preview Area */
+      .upload-title {
+        font-weight: 900;
+        font-size: 1.05rem;
+        margin-bottom: 0.2rem;
+      }
+
+      .upload-hint {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+      }
+
+      /* Preview */
       #previewContainer {
-        margin-top: 1rem;
+        margin-top: 0.9rem;
         display: none;
-        position: relative;
       }
 
       .preview-content {
-        padding: 0.75rem;
+        padding: 0.85rem;
         background: #f1f5f9;
-        border-radius: 8px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.9rem;
+        border: 1px solid var(--border);
+      }
+
+      .preview-left {
         display: flex;
         align-items: center;
         gap: 0.75rem;
+        min-width: 0;
+      }
+
+      #fileName {
+        font-weight: 700;
+        font-size: 0.92rem;
+        color: #0f172a;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 420px;
+      }
+
+      .btn-small {
+        border: 1px solid var(--border);
+        background: white;
+        padding: 0.45rem 0.75rem;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 800;
         font-size: 0.85rem;
-        font-weight: 500;
+      }
+
+      .btn-small:hover {
+        background: #f8fafc;
       }
 
       .btn-generate {
@@ -162,16 +280,17 @@
         background: var(--primary);
         color: white;
         border: none;
-        padding: 1rem;
+        padding: 1.05rem;
         font-size: 1rem;
-        font-weight: 700;
-        border-radius: 12px;
+        font-weight: 900;
+        border-radius: 14px;
         cursor: pointer;
         transition: all 0.2s;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 0.5rem;
+        gap: 0.55rem;
+        margin-top: 1.2rem;
       }
 
       .btn-generate:hover {
@@ -185,11 +304,26 @@
         transform: none;
       }
 
-      /* Loading State */
+      /* Error + Loading + Results */
+      .error-box {
+        background: #fef2f2;
+        color: var(--danger);
+        padding: 1rem;
+        border-radius: 12px;
+        border: 1px solid #fee2e2;
+        margin-bottom: 1rem;
+        display: none;
+        max-width: 760px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
       .loading-container {
         display: none;
         text-align: center;
         padding: 2rem;
+        max-width: 760px;
+        margin: 0 auto;
       }
 
       .spinner {
@@ -211,43 +345,15 @@
         }
       }
 
-      /* Results UI */
       #resultsArea {
         display: none;
+        max-width: 980px;
+        margin: 0 auto;
       }
 
-      .summary-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-        margin-bottom: 2rem;
-      }
-
-      .stat-card {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 12px;
-        border: 1px solid var(--border);
-      }
-
-      .stat-label {
-        font-size: 0.8rem;
-        color: var(--text-muted);
-        text-transform: uppercase;
-        font-weight: 700;
-        margin-bottom: 0.25rem;
-      }
-
-      .stat-value {
-        font-size: 1.5rem;
-        font-weight: 800;
-        color: var(--primary);
-      }
-
-      /* Table Design */
       .table-responsive {
         overflow-x: auto;
-        border-radius: 12px;
+        border-radius: 14px;
         border: 1px solid var(--border);
         background: white;
       }
@@ -256,13 +362,13 @@
         width: 100%;
         border-collapse: collapse;
         text-align: left;
-        font-size: 0.9rem;
+        font-size: 0.92rem;
       }
 
       th {
         background: #f8fafc;
         padding: 1rem;
-        font-weight: 700;
+        font-weight: 900;
         color: #475569;
         border-bottom: 2px solid var(--border);
       }
@@ -270,6 +376,7 @@
       td {
         padding: 1rem;
         border-bottom: 1px solid var(--border);
+        vertical-align: top;
       }
 
       tr:last-child td {
@@ -281,115 +388,128 @@
         padding: 0.25rem 0.6rem;
         border-radius: 9999px;
         font-size: 0.75rem;
-        font-weight: 600;
+        font-weight: 800;
         background: #eff6ff;
         color: var(--primary);
       }
 
-      .row-total {
-        background: #f8fafc;
-        font-weight: 800;
-        font-size: 1rem;
+      .print-wrap {
+        margin-top: 1.25rem;
+        text-align: center;
       }
 
-      .error-box {
-        background: #fef2f2;
-        color: var(--danger);
-        padding: 1rem;
-        border-radius: 8px;
-        border: 1px solid #fee2e2;
-        margin-bottom: 1rem;
-        display: none;
+      .btn-print {
+        background: none;
+        border: 1px solid var(--border);
+        padding: 0.55rem 1rem;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 800;
+      }
+
+      .btn-print:hover {
+        background: #f8fafc;
       }
     </style>
   </head>
+
   <body>
     <div class="container">
       <header>
-        <h1>AI Estimator <span style="color: var(--primary)">RAB</span></h1>
+        <h1>AI Estimator <span>RAB</span></h1>
         <p>
-          Gunakan kecerdasan buatan untuk menghitung estimasi biaya konstruksi
-          Anda secara instan.
+          Pilih mode input, isi deskripsi (chat) di tengah, lalu upload berkas
+          (opsional) di bawah.
         </p>
       </header>
 
       <div class="card">
-        <div class="grid-input">
-          <div class="input-field">
-            <label for="promptInput">Deskripsi Proyek</label>
+        <div class="center-stack">
+          <!-- MODE SELECTOR -->
+          <div class="mode-wrap" id="modeWrap">
+            <span class="mode-title">Mode Input:</span>
+
+            <label class="mode-pill active" data-mode="both">
+              <input type="radio" name="mode" value="both" checked />
+              Keduanya
+            </label>
+
+            <label class="mode-pill" data-mode="prompt">
+              <input type="radio" name="mode" value="prompt" />
+              Deskripsi saja
+            </label>
+
+            <label class="mode-pill" data-mode="file">
+              <input type="radio" name="mode" value="file" />
+              File saja
+            </label>
+          </div>
+
+          <!-- CHAT / DESCRIPTION IN CENTER -->
+          <div class="field">
+            <label for="promptInput">Deskripsi Proyek (Chat)</label>
             <textarea
               id="promptInput"
-              placeholder="Contoh: Bangun rumah 1 lantai tipe 45, dinding bata merah, atap baja ringan..."
+              placeholder="Contoh: Rumah 1 lantai tipe 45, 2 kamar, 1 kamar mandi, dinding bata merah, atap baja ringan, lantai keramik..."
             ></textarea>
+            <div class="subtext">
+              Tulis minimal: luas/tipe, jumlah ruang, material utama, dan
+              kebutuhan khusus.
+            </div>
           </div>
-          <div class="input-field">
-            <label>File Pendukung (Gambar/PDF)</label>
-            <div class="upload-zone">
+
+          <!-- UPLOAD BELOW -->
+          <div class="field">
+            <label>Upload Berkas (Opsional)</label>
+            <div class="upload-zone" id="uploadZone">
               <span class="upload-icon">📁</span>
-              <strong>Klik untuk upload</strong>
-              <p style="font-size: 0.8rem; color: var(--text-muted)">
-                PNG, JPG, atau PDF Denah/Teknis
-              </p>
+              <div class="upload-title">Klik atau tarik berkas ke sini</div>
+              <div class="upload-hint">
+                PNG, JPG, atau PDF denah/tampak/detail teknis
+              </div>
               <input
                 type="file"
                 id="fileInput"
                 accept="image/*,application/pdf"
               />
             </div>
+
             <div id="previewContainer">
               <div class="preview-content">
-                <span id="fileIcon">📄</span>
-                <span id="fileName">Nama_file.pdf</span>
+                <div class="preview-left">
+                  <span id="fileIcon">📄</span>
+                  <span id="fileName">Nama_file.pdf</span>
+                </div>
+                <button class="btn-small" type="button" onclick="clearFile()">
+                  Hapus
+                </button>
               </div>
             </div>
-          </div>
-        </div>
 
-        <button id="generateBtn" class="btn-generate" onclick="generateRAB()">
-          <span id="btnText">Mulai Estimasi AI</span>
-        </button>
+            <div class="subtext">
+              Upload denah/tampak membantu AI memperkirakan volume lebih rapi
+              (tetap tanpa harga).
+            </div>
+          </div>
+
+          <button id="generateBtn" class="btn-generate" onclick="generateRAB()">
+            <span id="btnText">Mulai Estimasi AI</span>
+          </button>
+        </div>
       </div>
 
       <div id="errorBox" class="error-box"></div>
 
       <div id="loading" class="loading-container">
         <div class="spinner"></div>
-        <h3 id="loadingStatus">Menganalisis Dokumen...</h3>
+        <h3 id="loadingStatus">Menganalisis...</h3>
         <p style="color: var(--text-muted); font-size: 0.9rem">
-          AI sedang menghitung volume dan harga satuan berdasarkan standar
-          konstruksi.
+          AI sedang menyusun item pekerjaan dan menghitung volume secara wajar.
         </p>
       </div>
 
-      <!-- Results Section -->
       <div id="resultsArea">
-        <div class="summary-grid">
-          <div class="stat-card">
-            <div class="stat-label">Total Estimasi</div>
-            <div class="stat-value" id="totalEstimate">Rp 0</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Jumlah Item</div>
-            <div
-              class="stat-value"
-              id="totalItems"
-              style="color: var(--text-main)"
-            >
-              0
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Kategori Utama</div>
-            <div
-              class="stat-value"
-              id="topCategory"
-              style="color: var(--success)"
-            >
-              -
-            </div>
-          </div>
-        </div>
-
         <div class="table-responsive">
           <table>
             <thead>
@@ -398,44 +518,14 @@
                 <th>Uraian Pekerjaan</th>
                 <th>Vol</th>
                 <th>Sat</th>
-                <th style="text-align: right">Harga Satuan</th>
-                <th style="text-align: right">Total Harga</th>
               </tr>
             </thead>
             <tbody id="rabTableBody"></tbody>
-            <tfoot>
-              <tr class="row-total">
-                <td colspan="5" style="text-align: right; padding: 1.25rem">
-                  GRAND TOTAL
-                </td>
-                <td
-                  id="grandTotalCell"
-                  style="
-                    text-align: right;
-                    padding: 1.25rem;
-                    color: var(--primary);
-                  "
-                >
-                  Rp 0
-                </td>
-              </tr>
-            </tfoot>
           </table>
         </div>
 
-        <div style="margin-top: 1.5rem; text-align: center">
-          <button
-            onclick="window.print()"
-            style="
-              background: none;
-              border: 1px solid var(--border);
-              padding: 0.5rem 1rem;
-              border-radius: 8px;
-              cursor: pointer;
-              font-size: 0.85rem;
-              font-weight: 600;
-            "
-          >
+        <div class="print-wrap">
+          <button class="btn-print" onclick="window.print()">
             🖨️ Cetak atau Simpan PDF
           </button>
         </div>
@@ -444,45 +534,158 @@
 
     <script>
       const fileInput = document.getElementById("fileInput");
+      const uploadZone = document.getElementById("uploadZone");
       const previewContainer = document.getElementById("previewContainer");
       const fileNameDisplay = document.getElementById("fileName");
       const fileIcon = document.getElementById("fileIcon");
+
+      const promptInput = document.getElementById("promptInput");
       const errorBox = document.getElementById("errorBox");
       const loading = document.getElementById("loading");
       const resultsArea = document.getElementById("resultsArea");
       const generateBtn = document.getElementById("generateBtn");
       const btnText = document.getElementById("btnText");
+      const modeWrap = document.getElementById("modeWrap");
 
       let base64Data = "";
       let fileType = "";
+      let mode = "both"; // both | prompt | file
+
+      const CATEGORY_ORDER = [
+        "Persiapan",
+        "Tanah & Pondasi",
+        "Struktur",
+        "Dinding",
+        "Lantai",
+        "Plafond",
+        "Atap",
+        "Pintu Jendela",
+        "Finishing/Pengecatan",
+        "MEP",
+      ];
+
+      function normalizeCategory(cat) {
+        if (!cat) return "Lainnya";
+        const s = String(cat).trim();
+        if (/persiapan/i.test(s)) return "Persiapan";
+        if (/pondasi|tanah/i.test(s)) return "Tanah & Pondasi";
+        if (/struktur/i.test(s)) return "Struktur";
+        if (/dinding/i.test(s)) return "Dinding";
+        if (/lantai/i.test(s)) return "Lantai";
+        if (/plafond|plafon/i.test(s)) return "Plafond";
+        if (/atap/i.test(s)) return "Atap";
+        if (/pintu|jendela/i.test(s)) return "Pintu Jendela";
+        if (/finishing|cat|pengecatan/i.test(s)) return "Finishing/Pengecatan";
+        if (/mep|listrik|air|plumbing|sanit|mekanikal|elektrikal/i.test(s))
+          return "MEP";
+        return s;
+      }
+
+      function categoryRank(cat) {
+        const idx = CATEGORY_ORDER.indexOf(cat);
+        return idx === -1 ? 999 : idx;
+      }
+
+      function applyMode(nextMode) {
+        mode = nextMode;
+
+        document.querySelectorAll(".mode-pill").forEach((pill) => {
+          pill.classList.toggle("active", pill.dataset.mode === mode);
+        });
+
+        const needPrompt = mode === "prompt" || mode === "both";
+        const needFile = mode === "file" || mode === "both";
+
+        promptInput.disabled = !needPrompt;
+        uploadZone.classList.toggle("disabled", !needFile);
+
+        if (!needFile) clearFile();
+        if (!needPrompt) promptInput.value = "";
+      }
+
+      modeWrap.addEventListener("change", (e) => {
+        if (e.target.name === "mode") applyMode(e.target.value);
+      });
+
+      // Drag & drop UX
+      uploadZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        if (uploadZone.classList.contains("disabled")) return;
+        uploadZone.classList.add("dragover");
+      });
+
+      uploadZone.addEventListener("dragleave", () => {
+        uploadZone.classList.remove("dragover");
+      });
+
+      uploadZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove("dragover");
+        if (uploadZone.classList.contains("disabled")) return;
+
+        const file = e.dataTransfer.files?.[0];
+        if (!file) return;
+
+        // set to input for consistency
+        fileInput.files = e.dataTransfer.files;
+        handleFile(file);
+      });
+
+      uploadZone.addEventListener("click", (e) => {
+        if (uploadZone.classList.contains("disabled")) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      });
 
       fileInput.addEventListener("change", function (e) {
         const file = e.target.files[0];
         if (!file) return;
+        handleFile(file);
+      });
+
+      function handleFile(file) {
+        if (mode === "prompt") {
+          clearFile();
+          return;
+        }
 
         fileType = file.type;
         const reader = new FileReader();
-
-        reader.onload = function (e) {
-          base64Data = e.target.result;
+        reader.onload = function (ev) {
+          base64Data = ev.target.result;
           previewContainer.style.display = "block";
           fileNameDisplay.textContent = file.name;
           fileIcon.textContent = fileType.includes("pdf") ? "📄" : "🖼️";
         };
         reader.readAsDataURL(file);
-      });
+      }
+
+      function clearFile() {
+        base64Data = "";
+        fileType = "";
+        fileInput.value = "";
+        previewContainer.style.display = "none";
+      }
 
       async function generateRAB() {
-        const promptVal = document.getElementById("promptInput").value.trim();
+        const promptVal = promptInput.value.trim();
 
-        if (!base64Data && !promptVal) {
+        if (mode === "prompt" && !promptVal) {
           showError(
-            "Harap masukkan instruksi atau upload file terlebih dahulu."
+            "Harap isi deskripsi proyek terlebih dahulu (mode: deskripsi saja)."
           );
           return;
         }
+        if (mode === "file" && !base64Data) {
+          showError("Harap upload berkas terlebih dahulu (mode: file saja).");
+          return;
+        }
+        if (mode === "both" && !promptVal && !base64Data) {
+          showError("Harap isi deskripsi atau upload berkas terlebih dahulu.");
+          return;
+        }
 
-        // Reset UI
         errorBox.style.display = "none";
         resultsArea.style.display = "none";
         loading.style.display = "block";
@@ -491,9 +694,9 @@
 
         try {
           const payload = {
-            prompt: promptVal,
-            file: base64Data,
-            file_type: fileType,
+            prompt: promptVal || "",
+            file: base64Data || "",
+            file_type: fileType || "",
           };
 
           const response = await fetch("http://localhost:5000/generate-rab", {
@@ -503,7 +706,6 @@
           });
 
           const data = await response.json();
-
           if (!response.ok)
             throw new Error(data.error || "Terjadi kesalahan pada server AI.");
 
@@ -520,62 +722,38 @@
       function renderResults(data) {
         const tbody = document.getElementById("rabTableBody");
         tbody.innerHTML = "";
-        let grandTotal = 0;
-        let categories = {};
 
         if (!Array.isArray(data)) {
           showError("Format data yang diterima tidak valid.");
           return;
         }
 
-        data.forEach((item) => {
+        const sorted = data
+          .map((it) => ({ ...it, kategori: normalizeCategory(it.kategori) }))
+          .sort((a, b) => {
+            const ra = categoryRank(a.kategori);
+            const rb = categoryRank(b.kategori);
+            if (ra !== rb) return ra - rb;
+            const ua = (a.uraian_pekerjaan || "").toLowerCase();
+            const ub = (b.uraian_pekerjaan || "").toLowerCase();
+            return ua.localeCompare(ub);
+          });
+
+        sorted.forEach((item) => {
           const row = document.createElement("tr");
           row.innerHTML = `
-                <td><span class="cat-badge">${item.kategori}</span></td>
-                <td><div style="font-weight: 500;">${
-                  item.uraian_pekerjaan
-                }</div></td>
-                <td>${item.volume}</td>
-                <td style="color: var(--text-muted);">${item.satuan}</td>
-                <td style="text-align: right;">${formatCurrency(
-                  item.harga_satuan
-                )}</td>
-                <td style="text-align: right; font-weight: 600;">${formatCurrency(
-                  item.total_harga
-                )}</td>
-            `;
+            <td><span class="cat-badge">${item.kategori ?? "-"}</span></td>
+            <td><div style="font-weight: 600;">${
+              item.uraian_pekerjaan ?? "-"
+            }</div></td>
+            <td>${item.volume ?? "-"}</td>
+            <td style="color: var(--text-muted);">${item.satuan ?? "-"}</td>
+          `;
           tbody.appendChild(row);
-
-          grandTotal += item.total_harga;
-          categories[item.kategori] =
-            (categories[item.kategori] || 0) + item.total_harga;
         });
 
-        // Update Statistics
-        document.getElementById("totalEstimate").textContent =
-          formatCurrency(grandTotal);
-        document.getElementById("grandTotalCell").textContent =
-          formatCurrency(grandTotal);
-        document.getElementById("totalItems").textContent = data.length;
-
-        // Find top category
-        const topCat = Object.entries(categories).reduce((a, b) =>
-          a[1] > b[1] ? a : b
-        )[0];
-        document.getElementById("topCategory").textContent = topCat;
-
         resultsArea.style.display = "block";
-
-        // Smooth scroll to results
         resultsArea.scrollIntoView({ behavior: "smooth" });
-      }
-
-      function formatCurrency(val) {
-        return new Intl.NumberFormat("id-ID", {
-          style: "currency",
-          currency: "IDR",
-          minimumFractionDigits: 0,
-        }).format(val);
       }
 
       function showError(msg) {
@@ -583,6 +761,8 @@
         errorBox.style.display = "block";
         window.scrollTo({ top: errorBox.offsetTop - 100, behavior: "smooth" });
       }
+
+      applyMode("both");
     </script>
   </body>
 </html>
